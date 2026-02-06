@@ -10,7 +10,7 @@ const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://10.10.174.49:5000/api/auth/login', { email, password });
+            const res = await axios.post('https://smart-hostel-api.onrender.com/api/auth/login', { email, password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('userRole', res.data.user.role);
             localStorage.setItem('user', JSON.stringify(res.data.user));

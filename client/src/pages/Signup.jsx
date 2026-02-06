@@ -9,7 +9,7 @@ const Signup = () => {
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://10.10.174.49:5000/api/auth/signup', formData);
+            await axios.post('https://smart-hostel-api.onrender.com/api/auth/signup', formData);
             navigate('/login');
         } catch (err) {
             alert("Error: User might already exist.");

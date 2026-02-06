@@ -41,7 +41,7 @@ const Dashboard = () => {
 
     const fetchRooms = async () => {
         try {
-            const res = await axios.get('http://10.10.174.49:5000/api/rooms/all');
+            const res = await axios.get('https://smart-hostel-api.onrender.com/api/rooms/all');
             setRooms(res.data);
         } catch (err) {
             console.error("Error fetching rooms", err);
@@ -140,7 +140,7 @@ const Dashboard = () => {
                     {role === 'student' && (
                         <div>
                             {spotsLeft > 0 && !isMyPending && !isMyRoom && (
-                                <button onClick={() => handleAction(`http://10.10.174.49:5000/api/rooms/apply/${room._id}`, { userId })} className="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200">Request Booking</button>
+                                <button onClick={() => handleAction(`https://smart-hostel-api.onrender.com/api/rooms/apply/${room._id}`, { userId })} className="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200">Request Booking</button>
                             )}
                             {isMyPending && <div className="p-5 bg-amber-50 text-amber-600 rounded-[2rem] text-center font-bold text-xs uppercase tracking-widest border border-amber-100">Pending Approval</div>}
                             {isMyRoom && <div className="p-5 bg-indigo-50 text-indigo-600 rounded-[2rem] text-center font-bold text-xs uppercase tracking-widest border border-indigo-100">Access Granted</div>}
@@ -162,8 +162,8 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleAction(`http://10.10.174.49:5000/api/rooms/approve/${room._id}`, { userId: student._id })} className="flex-1 bg-emerald-500 text-white py-2 rounded-xl font-bold text-[9px] uppercase tracking-wider hover:bg-emerald-600">Approve</button>
-                                                <button onClick={() => handleAction(`http://10.10.174.49:5000/api/rooms/decline/${room._id}`, { userId: student._id })} className="flex-1 bg-white text-rose-500 border border-rose-100 py-2 rounded-xl font-bold text-[9px] uppercase tracking-wider hover:bg-rose-50">Decline</button>
+                                                <button onClick={() => handleAction(`https://smart-hostel-api.onrender.com/api/rooms/approve/${room._id}`, { userId: student._id })} className="flex-1 bg-emerald-500 text-white py-2 rounded-xl font-bold text-[9px] uppercase tracking-wider hover:bg-emerald-600">Approve</button>
+                                                <button onClick={() => handleAction(`https://smart-hostel-api.onrender.com/api/rooms/decline/${room._id}`, { userId: student._id })} className="flex-1 bg-white text-rose-500 border border-rose-100 py-2 rounded-xl font-bold text-[9px] uppercase tracking-wider hover:bg-rose-50">Decline</button>
                                             </div>
                                         </div>
                                     ))}
@@ -182,7 +182,7 @@ const Dashboard = () => {
                                                 </div>
                                                 {/* CANCEL BUTTON ADDED HERE */}
                                                 <button 
-                                                    onClick={() => handleAction(`http://10.10.174.49:5000/api/rooms/cancel/${room._id}`, { userId: resident._id })}
+                                                    onClick={() => handleAction(`https://smart-hostel-api.onrender.com/api/rooms/cancel/${room._id}`, { userId: resident._id })}
                                                     className="text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase underline"
                                                 >
                                                     Cancel
@@ -333,7 +333,7 @@ const Dashboard = () => {
                         
                         <form onSubmit={async (e) => {
                             e.preventDefault();
-                            await axios.post('http://10.10.174.49:5000/api/rooms/add', newRoom);
+                            await axios.post('https://smart-hostel-api.onrender.com/api/rooms/add', newRoom);
                             setShowModal(false); fetchRooms();
                         }} className="space-y-4">
                             <input type="text" placeholder="Room Number (e.g. 101)" required className="w-full p-5 bg-slate-50 rounded-[2rem] outline-none font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 transition" onChange={e => setNewRoom({...newRoom, roomNumber: e.target.value})} />

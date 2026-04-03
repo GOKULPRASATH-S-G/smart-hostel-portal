@@ -1,57 +1,61 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// REGISTER
-router.post('/signup', async (req, res) => {
+router.post('/google-login', async (req, res) => {
     try {
-        const { name, email, password, role, year, phoneNumber } = req.body;
+        const { token, role } = req.body; 
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const { name, email } = ticket.getPayload();
 
         let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ msg: "User already exists" });
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        if (!user) {
+            // New user: Save with the selected role
+            user = new User({ name, email, role: role || 'student' });
+            await user.save();
+        } else {
+            // SECURITY CHECK: Prevents same email being used for two different roles
+            if (role && user.role !== role) {
+                return res.status(403).json({ 
+                    msg: `This email is already registered as a ${user.role.toUpperCase()}. You cannot login as an ${role.toUpperCase()}.` 
+                });
+            }
+        }
 
-        // Save User with new fields
-        user = new User({ 
-            name, 
-            email, 
-            password: hashedPassword, 
-            role, 
-            year, 
-            phoneNumber 
+        const jwtToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        res.json({ 
+            token: jwtToken, 
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role, 
+                phoneNumber: user.phoneNumber, 
+                year: user.year 
+            } 
         });
-        await user.save();
-
-        res.status(201).json({ msg: "User registered successfully" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    } catch (err) { 
+        res.status(400).json({ msg: "Google Auth Failed" }); 
     }
 });
 
-// LOGIN
-router.post('/login', async (req, res) => {
+// UPDATE PROFILE (Now updates Name as well)
+router.post('/update-profile', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: "Invalid Credentials" });
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: "Invalid Credentials" });
-
-        const token = jwt.sign(
-            { id: user._id, role: user.role }, 
-            process.env.JWT_SECRET, 
-            { expiresIn: '1d' }
+        const { userId, phoneNumber, year, name } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            userId, 
+            { phoneNumber, year, name }, // Admin will see this 'name'
+            { new: true }
         );
-
-        res.json({
-            token,
-            user: { id: user._id, name: user.name, role: user.role }
-        });
+        res.json({ user: { id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, role: updatedUser.role, phoneNumber: updatedUser.phoneNumber, year: updatedUser.year } });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
